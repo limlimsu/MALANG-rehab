@@ -1,6 +1,20 @@
 using System;
 using UnityEngine;
 
+// 센서 없이 개인별 힘 보정 흐름을 시험하는 화면 (테스팅)
+// 슬라이더가 압력센서 원시값을 대신하며, 추후 실제 센서 입력으로 교체한다.
+/*
+ * 용도: 실제 센서 없이 개인별 힘 보정 과정을 시험한다.
+ *
+ * 실행 방법
+ * 1. Unity에서 Assets/Scenes/CalibrationTest 씬을 연다.
+ * 2. 위쪽 Play 버튼을 누르고 Game 탭을 본다.
+ * 3. 슬라이더를 왼쪽으로 옮긴 뒤 "휴식값으로 기록"을 누른다.
+ * 4. 슬라이더를 오른쪽으로 옮겨 "최대 수행값 기록"을 3번 누른다.
+ * 5. 슬라이더를 움직이며 보정값이 0~100%로 변하는지 확인한다.
+ *
+ * 보정값은 게임 입력용 상대값이며 실제 악력 단위가 아니다.
+ */
 public class CalibrationMock : MonoBehaviour
 {
     private float rawValue;
@@ -34,6 +48,7 @@ public class CalibrationMock : MonoBehaviour
 
             if (sampleCount == 3)
             {
+                // 세 번의 최대 수행값 중 중앙값을 사용해 한 번의 튀는 측정값 영향을 줄인다.
                 Array.Sort(maxSamples);
                 maxValue = maxSamples[1]; // 세 값의 중앙값
                 calibrated = maxValue - restValue >= 100f;
@@ -48,6 +63,8 @@ public class CalibrationMock : MonoBehaviour
 
         if (calibrated)
         {
+            // 개인별 휴식값을 0%, 최대 수행값을 100%로 환산한다.
+            // 이는 실제 악력 단위가 아닌 게임 입력용 상대값이다.
             float percent = Mathf.Clamp01(
                 (rawValue - restValue) / (maxValue - restValue)
             ) * 100f;
