@@ -25,6 +25,13 @@ public class CalibrationMock : MonoBehaviour
     private bool calibrated;
     private float maxValue;
 
+    // 다른 게임 스크립트가 보정 완료 여부와 현재 힘(0~100%)을 읽을 때 사용한다.
+    public bool IsCalibrated => calibrated;
+
+    public float CurrentPercent =>
+        calibrated
+            ? Mathf.Clamp01((rawValue - restValue) / (maxValue - restValue)) * 100f
+            : 0f;
     private void OnGUI()
     {
         GUILayout.BeginArea(new Rect(20, 20, 420, 320), GUI.skin.box);
