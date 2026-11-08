@@ -34,6 +34,6 @@ public class MainMenuController : MonoBehaviour
 
     private void StartExercise()
     {
-        SceneManager.LoadScene("RehabGameUI");
+        SceneManager.LoadScene("GameSelect");
     }
 }

@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: e49b6ff17a29e5f42914a42eaa8376af
   - enabled: 1
+    path: Assets/Scenes/GameSelect.unity
+    guid: 8ed399cdd7c19b1428a4abfe0510d37a
+  - enabled: 1
     path: Assets/Scenes/RehabGameUI.unity
     guid: c2f3de68e00746949bcfeefe5f38b39e
   m_configObjects:
