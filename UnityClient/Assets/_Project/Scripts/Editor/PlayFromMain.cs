@@ -18,6 +18,7 @@ namespace Malang.EditorTools
     {
         private const string PrefKey = "Malang.PlayFromMain";
         private const string PendingKey = "Malang.PendingRebuildPrompt";
+        private const string OpenedMainKey = "Malang.OpenedMainOnStartup";
         private const string MenuPath = "MALANG/Play From Main Scene";
         private static readonly Regex VersionPattern = new Regex(@"sceneVersion:\s*(\d+)");
 
@@ -69,11 +70,32 @@ namespace Malang.EditorTools
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
+            OpenMainIfEmpty();
+
             if (SessionState.GetBool(PendingKey, false) || IsOutdated())
             {
                 SessionState.SetBool(PendingKey, false);
                 PromptRebuild();
             }
+        }
+
+        /// <summary>
+        /// 새로 클론한 프로젝트는 "마지막으로 연 씬" 정보(Library, git 제외)가 없어 빈 Untitled 씬으로 열린다.
+        /// 에디터를 켠 뒤 처음 한 번, 저장 안 된 빈 씬 하나만 열려 있으면 Main.unity 를 연다.
+        /// </summary>
+        private static void OpenMainIfEmpty()
+        {
+            if (SessionState.GetBool(OpenedMainKey, false))
+                return;
+            SessionState.SetBool(OpenedMainKey, true);
+
+            if (EditorSceneManager.sceneCount != 1 || !File.Exists(SceneBuilder.ScenePath))
+                return;
+
+            UnityEngine.SceneManagement.Scene active = EditorSceneManager.GetActiveScene();
+            bool untitled = string.IsNullOrEmpty(active.path);
+            if (untitled && !active.isDirty)
+                EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
         }
 
         private static void OnPlayModeChanged(PlayModeStateChange change)
