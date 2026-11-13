@@ -6,13 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
-    guid: e49b6ff17a29e5f42914a42eaa8376af
-  - enabled: 1
-    path: Assets/Scenes/GameSelect.unity
-    guid: 8ed399cdd7c19b1428a4abfe0510d37a
-  - enabled: 1
-    path: Assets/Scenes/RehabGameUI.unity
-    guid: c2f3de68e00746949bcfeefe5f38b39e
+    path: Assets/_Project/Scenes/Main.unity
+    guid: b10fc46ccbab0fa4f8c9a8672cc3831a
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
