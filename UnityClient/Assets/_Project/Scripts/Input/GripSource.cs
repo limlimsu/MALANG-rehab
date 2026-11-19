@@ -21,6 +21,7 @@ namespace Malang.Input
         private static readonly int[] NoChannels = new int[0];
 
         private readonly GripFilter filter = new GripFilter();
+        private readonly GripFilter channelFilter = new GripFilter();
         private readonly Calibrator calibrator = new Calibrator();
 
         private GameConfig config;
@@ -129,6 +130,7 @@ namespace Malang.Input
                 device.Open(config);
 
             filter.Reset();
+            channelFilter.Reset();
             grip = 0f;
             rawSum = 0f;
             filteredSum = 0f;
@@ -170,9 +172,19 @@ namespace Malang.Input
         public void ClearCalibration()
         {
             calibrator.Clear();
+            channelFilter.Reset();
+            grip = 0f;
             PlayerPrefs.DeleteKey(PrefRest);
             PlayerPrefs.DeleteKey(PrefMax);
             PlayerPrefs.Save();
+        }
+
+        /// <summary>이번 세션의 FSR 4개 휴식·최대 원시값을 적용한다. 실패하면 이전 보정은 사용하지 않는다.</summary>
+        public bool SetChannelCalibration(float[] rest, float[] max, float minChannelSpan)
+        {
+            calibrator.Clear();
+            channelFilter.Reset();
+            return calibrator.SetChannels(rest, max, minChannelSpan);
         }
 
         private void LoadCalibration()
@@ -203,6 +215,7 @@ namespace Malang.Input
             {
                 grip = 0f;
                 filter.Reset();
+                channelFilter.Reset();
             }
             else if (device.IsNormalized && config.mockBypassCalibration)
             {
@@ -216,9 +229,16 @@ namespace Malang.Input
                 {
                     lastSampleCount = device.SampleCount;
                     filteredSum = filter.Step(rawSum, config.emaAlpha);
+                    if (calibrator.HasChannelCalibration && channelView.Length == 4)
+                        grip = channelFilter.Step(calibrator.NormalizeChannels(channelView), config.emaAlpha);
                 }
 
-                if (calibrator.IsReady)
+                if (calibrator.HasChannelCalibration)
+                {
+                    if (channelView.Length != 4)
+                        grip = 0f;
+                }
+                else if (calibrator.IsReady)
                     grip = calibrator.Normalize(filteredSum);
                 else
                     grip = device.IsNormalized ? Mathf.Clamp(filteredSum, 0f, 100f) : 0f;

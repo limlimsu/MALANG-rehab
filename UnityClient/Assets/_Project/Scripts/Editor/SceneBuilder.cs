@@ -269,15 +269,46 @@ namespace Malang.EditorTools
                 40f, Palette.Navy);
             Place(chip.Rect, TopLeft, TopLeft, new Vector2(Margin, -TopY), chip.Rect.sizeDelta);
 
-            AddSquish(BuildCharacter(root, "Character", new Vector2(0f, 120f), 380f));
-            Place(Txt(root, "Instruction", "cal.rest", FontRole.Title, 58f, Palette.Navy), Center, Center,
-                new Vector2(0f, -150f), new Vector2(1600f, 80f));
+            AddSquish(BuildCharacter(root, "Character", new Vector2(0f, 235f), 280f));
+            LocText instruction = Txt(root, "Instruction", "cal.restPrompt", FontRole.Title, 52f, Palette.Navy);
+            Place(instruction, Center, Center, new Vector2(0f, 35f), new Vector2(1750f, 80f));
+            LocText status = Txt(root, "Status", "cal.connected", FontRole.Body, 36f, Palette.SubText);
+            Place(status, Center, Center, new Vector2(0f, -40f), new Vector2(1750f, 56f));
 
-            Pill pill;
-            Button done = Btn(root, "DoneButton", Palette.Yellow, Palette.YellowShadow, 96f, 69f, "common.next",
-                FontRole.Title, 44f, Palette.ButtonText, out pill);
-            Place(pill.Rect, BottomRight, BottomRight, new Vector2(-Margin, BottomY), pill.Rect.sizeDelta);
-            Set(screen, "doneButton", done);
+            var labels = new LocText[4];
+            var fills = new Image[4];
+            for (int i = 0; i < 4; i++)
+            {
+                float x = (i - 1.5f) * 320f;
+                Image track = RoundImg(root, "SensorTrack" + (i + 1), Palette.WhiteSoft, 36f);
+                Place(track, Center, Center, new Vector2(x, -230f), new Vector2(116f, 240f));
+                Image fill = Img(track.transform, "Fill", Palette.Green);
+                Stretch(fill.rectTransform, 8f, 8f, 8f, 8f);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Vertical;
+                fill.fillOrigin = 0;
+                fill.fillAmount = 0f;
+                fills[i] = fill;
+                labels[i] = Txt(root, "SensorLabel" + (i + 1), "cal.waiting", FontRole.Body, 32f, Palette.Navy);
+                Place(labels[i], Center, Center, new Vector2(x, -390f), new Vector2(300f, 56f));
+            }
+
+            Pill actionPill;
+            Button action = Btn(root, "ActionButton", Palette.Yellow, Palette.YellowShadow, 96f, 69f,
+                "cal.recordRest", FontRole.Title, 40f, Palette.ButtonText, out actionPill);
+            Place(actionPill.Rect, BottomRight, BottomRight, new Vector2(-Margin, BottomY), actionPill.Rect.sizeDelta);
+            Pill backPill;
+            Button back = Btn(root, "BackButton", Palette.White, Palette.DisabledShadow, 80f, 50f,
+                "cal.back", FontRole.Body, 36f, Palette.Navy, out backPill);
+            Place(backPill.Rect, BottomLeft, BottomLeft, new Vector2(Margin, BottomY), backPill.Rect.sizeDelta);
+
+            Set(screen, "actionButton", action);
+            Set(screen, "backButton", back);
+            Set(screen, "actionLabel", actionPill.Label);
+            Set(screen, "instruction", instruction);
+            Set(screen, "status", status);
+            SetArray(screen, "sensorLabels", labels);
+            SetArray(screen, "sensorFills", fills);
 
             return screen;
         }

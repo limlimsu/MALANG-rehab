@@ -1,5 +1,4 @@
 using Malang.Core;
-using Malang.Training;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -67,8 +66,8 @@ namespace Malang.UI
 
         private void OnStart()
         {
-            SessionManager.Begin();
-            Go(ScreenId.Stage1);
+            // 보정을 마친 뒤 CalibrationScreen 이 세션을 열고 1단계를 시작한다.
+            Go(ScreenId.Calibration);
         }
 
         private void OnLockHeld()

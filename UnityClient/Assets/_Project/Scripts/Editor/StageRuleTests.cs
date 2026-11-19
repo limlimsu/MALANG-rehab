@@ -1,5 +1,6 @@
 using System;
 using Malang.Core;
+using Malang.Input;
 using Malang.Training;
 using UnityEditor;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace Malang.EditorTools
             GameConfig.ClearCache();
             GameConfig cfg = GameConfig.Get();
 
+            FourChannelCalibration();
+
             Stage1_GripRelease_TenKills(cfg);
             Stage1_HoldWithoutRelease_NoNextMonster(cfg);
             Stage1_NoGrip_TimeUp(cfg);
@@ -48,6 +51,23 @@ namespace Malang.EditorTools
                 Debug.Log(summary);
             else
                 Debug.LogError(summary);
+        }
+
+        private static void FourChannelCalibration()
+        {
+            var cal = new Calibrator();
+            Check("4채널: 변화가 없는 센서는 보정 거부",
+                !cal.SetChannels(new[] { 3000f, 1000f, 3000f, 1000f },
+                                 new[] { 2000f, 2000f, 3000f, 2000f }, 50f));
+            Check("4채널: 방향이 서로 다른 센서도 보정",
+                cal.SetChannels(new[] { 3000f, 1000f, 3000f, 1000f },
+                                new[] { 2000f, 2000f, 2000f, 2000f }, 50f));
+            Check("4채널: 휴식은 0%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 3000, 1000, 3000, 1000 }), 0f));
+            Check("4채널: 네 센서 중 둘만 절반이면 25%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 2500, 1500, 3000, 1000 }), 25f));
+            Check("4채널: 최대 쥐기는 100%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 2000, 2000, 2000, 2000 }), 100f));
         }
 
         // ---------- 1단계 ----------
