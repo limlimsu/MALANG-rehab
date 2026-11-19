@@ -125,6 +125,7 @@
   "guard.yes": "초기화",
   "guard.cancel": "취소",
   "guard.recent": "최근 세션",
+  "guard.historyRow": "{0} · {7}초\n1단계 {1}/{2}  ·  2단계 {3}/{4}  ·  3단계 {5}/{6}",
   "guard.noSessions": "아직 기록이 없어요",
   "guard.close": "닫기",
   "guard.mockPad": "화면 세기 버튼",

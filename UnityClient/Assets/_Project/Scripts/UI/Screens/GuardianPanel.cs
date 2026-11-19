@@ -1,4 +1,5 @@
 using Malang.Core;
+using Malang.Training;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,6 +24,11 @@ namespace Malang.UI
         [SerializeField] private Button soundButton;
         [SerializeField] private LocText soundState;
         [SerializeField] private Button closeButton;
+        [SerializeField] private GameObject settingsCard;
+        [SerializeField] private GameObject historyCard;
+        [SerializeField] private Button historyButton;
+        [SerializeField] private Button historyBackButton;
+        [SerializeField] private LocText[] historyRows;
 
         public bool IsOpen => gameObject.activeSelf;
 
@@ -35,6 +41,8 @@ namespace Malang.UI
             mockPadButton.onClick.AddListener(ToggleMockPad);
             soundButton.onClick.AddListener(ToggleSound);
             closeButton.onClick.AddListener(Close);
+            historyButton.onClick.AddListener(OpenHistory);
+            historyBackButton.onClick.AddListener(CloseHistory);
         }
 
         private void OnDestroy()
@@ -46,6 +54,8 @@ namespace Malang.UI
             mockPadButton.onClick.RemoveListener(ToggleMockPad);
             soundButton.onClick.RemoveListener(ToggleSound);
             closeButton.onClick.RemoveListener(Close);
+            historyButton.onClick.RemoveListener(OpenHistory);
+            historyBackButton.onClick.RemoveListener(CloseHistory);
         }
 
         private void OnEnable()
@@ -63,6 +73,7 @@ namespace Malang.UI
 
         public void Open()
         {
+            CloseHistory();
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
         }
@@ -70,6 +81,42 @@ namespace Malang.UI
         public void Close()
         {
             gameObject.SetActive(false);
+        }
+
+        private void OpenHistory()
+        {
+            var records = SessionHistory.Recent(historyRows.Length);
+            for (int i = 0; i < historyRows.Length; i++)
+            {
+                if (i >= records.Count)
+                {
+                    historyRows[i].SetRaw(i == 0 ? Loc.T("guard.noSessions") : "");
+                    continue;
+                }
+
+                SessionRecord record = records[i];
+                int[] scores = new int[3];
+                int[] tries = new int[3];
+                foreach (StageResult stage in record.stages)
+                {
+                    if (stage == null || stage.stage < 1 || stage.stage > 3)
+                        continue;
+                    scores[stage.stage - 1] = stage.score;
+                    tries[stage.stage - 1] = stage.tries;
+                }
+                historyRows[i].SetRaw(Loc.F("guard.historyRow", record.date,
+                    scores[0], tries[0], scores[1], tries[1], scores[2], tries[2],
+                    Mathf.RoundToInt(record.durationSeconds)));
+            }
+
+            settingsCard.SetActive(false);
+            historyCard.SetActive(true);
+        }
+
+        private void CloseHistory()
+        {
+            historyCard.SetActive(false);
+            settingsCard.SetActive(true);
         }
 
         private void SelectKorean()

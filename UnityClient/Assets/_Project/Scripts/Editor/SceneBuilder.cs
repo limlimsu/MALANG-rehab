@@ -1164,7 +1164,7 @@ namespace Malang.EditorTools
 
             Image card = RoundImg(dim.transform, "Card", Palette.White, 40f);
             card.raycastTarget = true;
-            Place(card, Center, Center, Vector2.zero, new Vector2(1100f, 940f));
+            Place(card, Center, Center, Vector2.zero, new Vector2(1100f, 1100f));
             Transform c = card.transform;
 
             Place(Txt(c, "Title", "guard.title", FontRole.Title, 58f, Palette.Navy, TextAlignmentOptions.Left),
@@ -1217,6 +1217,30 @@ namespace Malang.EditorTools
                 FontRole.Title, 40f, Palette.Navy, out soundPill);
             Place(soundPill.Rect, TopLeft, TopLeft, new Vector2(620f, -755f), soundPill.Rect.sizeDelta);
 
+            Pill historyPill;
+            Button history = Btn(c, "HistoryButton", Palette.Yellow, Palette.YellowShadow, 96f, 48f,
+                "guard.recent", FontRole.Title, 40f, Palette.Navy, out historyPill);
+            Place(historyPill.Rect, TopLeft, TopLeft, new Vector2(60f, -900f), historyPill.Rect.sizeDelta);
+
+            Image historyCard = RoundImg(dim.transform, "HistoryCard", Palette.White, 40f);
+            historyCard.raycastTarget = true;
+            Place(historyCard, Center, Center, Vector2.zero, new Vector2(1100f, 760f));
+            Place(Txt(historyCard.transform, "Title", "guard.recent", FontRole.Title, 58f, Palette.Navy),
+                TopLeft, TopLeft, new Vector2(60f, -55f), new Vector2(700f, 80f));
+            Pill backPill;
+            Button back = Btn(historyCard.transform, "BackButton", Palette.Sky, Palette.DisabledShadow,
+                96f, 40f, "cal.back", FontRole.Title, 38f, Palette.Navy, out backPill);
+            Place(backPill.Rect, TopRight, TopRight, new Vector2(-45f, -45f), backPill.Rect.sizeDelta);
+            var rows = new LocText[4];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                rows[i] = Txt(historyCard.transform, "Session" + (i + 1), "", FontRole.Body, 32f,
+                    Palette.Navy, TextAlignmentOptions.Left);
+                Place(rows[i], TopLeft, TopLeft, new Vector2(60f, -190f - i * 125f),
+                    new Vector2(980f, 100f));
+            }
+            historyCard.gameObject.SetActive(false);
+
             Set(panel, "router", router);
             Set(panel, "koreanButton", ko);
             Set(panel, "englishButton", en);
@@ -1229,6 +1253,11 @@ namespace Malang.EditorTools
             Set(panel, "soundButton", sound);
             Set(panel, "soundState", soundPill.Label);
             Set(panel, "closeButton", close);
+            Set(panel, "settingsCard", card.gameObject);
+            Set(panel, "historyCard", historyCard.gameObject);
+            Set(panel, "historyButton", history);
+            Set(panel, "historyBackButton", back);
+            SetArray(panel, "historyRows", rows);
             return panel;
         }
 

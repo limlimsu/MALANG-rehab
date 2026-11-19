@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace Malang.Training
@@ -50,7 +51,17 @@ namespace Malang.Training
 
         public static void End()
         {
+            if (!IsActive)
+                return;
+
             IsActive = false;
+            if (results.Count > 0)
+                SessionHistory.Save(new SessionRecord
+                {
+                    date = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
+                    durationSeconds = (float)Time,
+                    stages = results.ToArray()
+                });
         }
     }
 }
