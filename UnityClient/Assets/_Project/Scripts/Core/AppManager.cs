@@ -20,7 +20,7 @@ namespace Malang.Core
         /// 12 = 넓고 낮은 구름 띠·로켓 띄우기·로켓 코, 13 = 구름 제거·그림자·위에서 착지·삼각형 로켓 코,
         /// 14 = 그림자 제거
         /// </summary>
-        public const int ExpectedSceneVersion = 17; // 17 = 4채널 개인별 힘 보정 화면
+        public const int ExpectedSceneVersion = 19; // 19 = 단계별 결과 지표
 
         [SerializeField] private ScreenRouter router;
         [SerializeField] private DebugOverlay debugOverlay;

@@ -39,6 +39,7 @@ namespace Malang.EditorTools
             Stage2_ExitGrace(cfg);
             Stage2_Metrics(cfg);
             Stage3_PerfectPlay(cfg);
+            Stage3_SlightlyEarlySucceeds(cfg);
             Stage3_Early(cfg);
             Stage3_Late(cfg);
             Stage3_WrongLevel(cfg);
@@ -304,6 +305,18 @@ namespace Malang.EditorTools
 
             Check("3단계: '지금'보다 0.5초 일찍 쥐면 성공 없음, 마지막 결과 '빨랐어'",
                 s.Successes == 0 && s.LastResult == NoteResult.Early);
+        }
+
+        private static void Stage3_SlightlyEarlySucceeds(GameConfig cfg)
+        {
+            Stage3Rhythm s = RunStage3(cfg, (st, t) =>
+            {
+                int k = NoteAt(st, t, -0.2d, 0d);
+                return k >= 0 ? Center(st, k) : 0f;
+            });
+
+            Check("3단계: 0.2초 일찍 눌러도 모든 노트 성공",
+                s.IsDone && s.Successes == s.NoteCount);
         }
 
         private static void Stage3_Late(GameConfig cfg)

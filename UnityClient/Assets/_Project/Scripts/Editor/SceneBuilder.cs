@@ -1122,12 +1122,34 @@ namespace Malang.EditorTools
                 TextAlignmentOptions.Left);
             Place(title, MiddleLeft, MiddleLeft, new Vector2(rightX, 200f), new Vector2(1100f, 100f));
 
+            string[] keys = { "done.scoreS1", "done.scoreS2", "done.scoreS3" };
+            var scores = new LocText[3];
+            var metrics = new LocText[3];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                float y = 80f - i * 150f;
+                Image card = RoundImg(root, "ScoreCard" + (i + 1), Palette.White, 28f);
+                Place(card, MiddleLeft, MiddleLeft, new Vector2(rightX, y), new Vector2(970f, 130f));
+                LocText label = Txt(card.transform, "Label", keys[i], FontRole.Body, 38f, Palette.Navy,
+                    TextAlignmentOptions.Left);
+                Place(label, MiddleLeft, MiddleLeft, new Vector2(32f, 26f), new Vector2(680f, 54f));
+                scores[i] = Txt(card.transform, "Score", "", FontRole.Title, 48f, Palette.Navy);
+                Place(scores[i], new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+                    new Vector2(-32f, 26f), new Vector2(200f, 60f));
+                scores[i].SetRaw("0 / 0");
+                metrics[i] = Txt(card.transform, "Metric", "done.metricS" + (i + 1), FontRole.Body, 30f,
+                    Palette.Navy, TextAlignmentOptions.Left);
+                Place(metrics[i], MiddleLeft, MiddleLeft, new Vector2(32f, -30f), new Vector2(870f, 44f));
+            }
+
             Pill homePill;
             Button home = Btn(root, "HomeButton", Palette.Yellow, Palette.YellowShadow, 110f, 77f, "done.home",
                 FontRole.Title, 46f, Palette.ButtonText, out homePill);
-            Place(homePill.Rect, MiddleLeft, MiddleLeft, new Vector2(rightX, -220f), homePill.Rect.sizeDelta);
+            Place(homePill.Rect, MiddleLeft, MiddleLeft, new Vector2(rightX, -390f), homePill.Rect.sizeDelta);
 
             Set(screen, "homeButton", home);
+            SetArray(screen, "scoreTexts", scores);
+            SetArray(screen, "metricTexts", metrics);
             return screen;
         }
 
