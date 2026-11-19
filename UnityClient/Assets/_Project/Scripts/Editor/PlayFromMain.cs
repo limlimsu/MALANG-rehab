@@ -22,10 +22,36 @@ namespace Malang.EditorTools
         private const string MenuPath = "MALANG/Play From Main Scene";
         private static readonly Regex VersionPattern = new Regex(@"sceneVersion:\s*(\d+)");
 
+        /// <summary>임포트·컴파일이 끝난 뒤 이만큼 에디터 업데이트가 조용히 지나가면 "시작 완료"로 본다.</summary>
+        private const int StableUpdatesNeeded = 60;
+
+        private static int stableUpdates;
+
         static PlayFromMain()
         {
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
-            EditorApplication.delayCall += OnEditorLoaded;
+            stableUpdates = 0;
+            EditorApplication.update += WaitUntilEditorSettles;
+        }
+
+        /// <summary>
+        /// 새로 클론한 프로젝트는 첫 임포트가 길고, 그 사이 Unity 가 시작 씬을 다시 만들 수 있다.
+        /// 컴파일·임포트가 모두 끝나고 에디터가 잠시 조용해진 뒤에 시작 처리를 한다.
+        /// </summary>
+        private static void WaitUntilEditorSettles()
+        {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating ||
+                EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                stableUpdates = 0;
+                return;
+            }
+
+            if (++stableUpdates < StableUpdatesNeeded)
+                return;
+
+            EditorApplication.update -= WaitUntilEditorSettles;
+            OnEditorLoaded();
         }
 
         private static bool Enabled
@@ -81,7 +107,8 @@ namespace Malang.EditorTools
 
         /// <summary>
         /// 새로 클론한 프로젝트는 "마지막으로 연 씬" 정보(Library, git 제외)가 없어 빈 Untitled 씬으로 열린다.
-        /// 에디터를 켠 뒤 처음 한 번, 저장 안 된 빈 씬 하나만 열려 있으면 Main.unity 를 연다.
+        /// 에디터를 켠 뒤 처음 한 번, 저장 안 된 Untitled 씬 하나만 열려 있고
+        /// 그 안이 비었거나 기본 오브젝트(카메라·조명)뿐이면 Main.unity 를 연다.
         /// </summary>
         private static void OpenMainIfEmpty()
         {
@@ -89,13 +116,37 @@ namespace Malang.EditorTools
                 return;
             SessionState.SetBool(OpenedMainKey, true);
 
-            if (EditorSceneManager.sceneCount != 1 || !File.Exists(SceneBuilder.ScenePath))
+            if (!File.Exists(SceneBuilder.ScenePath))
+            {
+                UnityEngine.Debug.LogWarning("MALANG: " + SceneBuilder.ScenePath + " 이 없습니다. " +
+                                             "브랜치를 확인하거나 MALANG > Build Scene 을 실행하세요.");
+                return;
+            }
+
+            if (EditorSceneManager.sceneCount != 1)
                 return;
 
             UnityEngine.SceneManagement.Scene active = EditorSceneManager.GetActiveScene();
-            bool untitled = string.IsNullOrEmpty(active.path);
-            if (untitled && !active.isDirty)
-                EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
+            if (!string.IsNullOrEmpty(active.path))
+                return; // 이미 저장된 씬이 열려 있음 (마지막으로 연 씬이 복원됨)
+
+            if (active.isDirty && !HasOnlyDefaultObjects(active))
+                return; // 사용자가 무언가 만든 새 씬은 건드리지 않음
+
+            EditorSceneManager.OpenScene(SceneBuilder.ScenePath);
+            UnityEngine.Debug.Log("MALANG: 시작 씬이 비어 있어 " + SceneBuilder.ScenePath + " 을 열었습니다.");
+        }
+
+        /// <summary>새 씬 기본 구성(비었거나 Main Camera · Directional Light 만)인지.</summary>
+        private static bool HasOnlyDefaultObjects(UnityEngine.SceneManagement.Scene scene)
+        {
+            foreach (UnityEngine.GameObject go in scene.GetRootGameObjects())
+            {
+                if (go.name != "Main Camera" && go.name != "Directional Light" && go.name != "Global Volume")
+                    return false;
+            }
+
+            return true;
         }
 
         private static void OnPlayModeChanged(PlayModeStateChange change)

@@ -1,5 +1,6 @@
 using System;
 using Malang.Core;
+using Malang.Input;
 using Malang.Training;
 using UnityEditor;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace Malang.EditorTools
             GameConfig.ClearCache();
             GameConfig cfg = GameConfig.Get();
 
+            FourChannelCalibration();
+
             Stage1_GripRelease_TenKills(cfg);
             Stage1_HoldWithoutRelease_NoNextMonster(cfg);
             Stage1_NoGrip_TimeUp(cfg);
@@ -36,6 +39,7 @@ namespace Malang.EditorTools
             Stage2_ExitGrace(cfg);
             Stage2_Metrics(cfg);
             Stage3_PerfectPlay(cfg);
+            Stage3_SlightlyEarlySucceeds(cfg);
             Stage3_Early(cfg);
             Stage3_Late(cfg);
             Stage3_WrongLevel(cfg);
@@ -48,6 +52,23 @@ namespace Malang.EditorTools
                 Debug.Log(summary);
             else
                 Debug.LogError(summary);
+        }
+
+        private static void FourChannelCalibration()
+        {
+            var cal = new Calibrator();
+            Check("4채널: 변화가 없는 센서는 보정 거부",
+                !cal.SetChannels(new[] { 3000f, 1000f, 3000f, 1000f },
+                                 new[] { 2000f, 2000f, 3000f, 2000f }, 50f));
+            Check("4채널: 방향이 서로 다른 센서도 보정",
+                cal.SetChannels(new[] { 3000f, 1000f, 3000f, 1000f },
+                                new[] { 2000f, 2000f, 2000f, 2000f }, 50f));
+            Check("4채널: 휴식은 0%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 3000, 1000, 3000, 1000 }), 0f));
+            Check("4채널: 네 센서 중 둘만 절반이면 25%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 2500, 1500, 3000, 1000 }), 25f));
+            Check("4채널: 최대 쥐기는 100%", Mathf.Approximately(
+                cal.NormalizeChannels(new[] { 2000, 2000, 2000, 2000 }), 100f));
         }
 
         // ---------- 1단계 ----------
@@ -284,6 +305,18 @@ namespace Malang.EditorTools
 
             Check("3단계: '지금'보다 0.5초 일찍 쥐면 성공 없음, 마지막 결과 '빨랐어'",
                 s.Successes == 0 && s.LastResult == NoteResult.Early);
+        }
+
+        private static void Stage3_SlightlyEarlySucceeds(GameConfig cfg)
+        {
+            Stage3Rhythm s = RunStage3(cfg, (st, t) =>
+            {
+                int k = NoteAt(st, t, -0.2d, 0d);
+                return k >= 0 ? Center(st, k) : 0f;
+            });
+
+            Check("3단계: 0.2초 일찍 눌러도 모든 노트 성공",
+                s.IsDone && s.Successes == s.NoteCount);
         }
 
         private static void Stage3_Late(GameConfig cfg)

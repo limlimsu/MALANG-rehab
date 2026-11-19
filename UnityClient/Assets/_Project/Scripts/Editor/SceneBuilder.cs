@@ -269,15 +269,46 @@ namespace Malang.EditorTools
                 40f, Palette.Navy);
             Place(chip.Rect, TopLeft, TopLeft, new Vector2(Margin, -TopY), chip.Rect.sizeDelta);
 
-            AddSquish(BuildCharacter(root, "Character", new Vector2(0f, 120f), 380f));
-            Place(Txt(root, "Instruction", "cal.rest", FontRole.Title, 58f, Palette.Navy), Center, Center,
-                new Vector2(0f, -150f), new Vector2(1600f, 80f));
+            AddSquish(BuildCharacter(root, "Character", new Vector2(0f, 235f), 280f));
+            LocText instruction = Txt(root, "Instruction", "cal.restPrompt", FontRole.Title, 52f, Palette.Navy);
+            Place(instruction, Center, Center, new Vector2(0f, 35f), new Vector2(1750f, 80f));
+            LocText status = Txt(root, "Status", "cal.connected", FontRole.Body, 36f, Palette.SubText);
+            Place(status, Center, Center, new Vector2(0f, -40f), new Vector2(1750f, 56f));
 
-            Pill pill;
-            Button done = Btn(root, "DoneButton", Palette.Yellow, Palette.YellowShadow, 96f, 69f, "common.next",
-                FontRole.Title, 44f, Palette.ButtonText, out pill);
-            Place(pill.Rect, BottomRight, BottomRight, new Vector2(-Margin, BottomY), pill.Rect.sizeDelta);
-            Set(screen, "doneButton", done);
+            var labels = new LocText[4];
+            var fills = new Image[4];
+            for (int i = 0; i < 4; i++)
+            {
+                float x = (i - 1.5f) * 320f;
+                Image track = RoundImg(root, "SensorTrack" + (i + 1), Palette.WhiteSoft, 36f);
+                Place(track, Center, Center, new Vector2(x, -230f), new Vector2(116f, 240f));
+                Image fill = Img(track.transform, "Fill", Palette.Green);
+                Stretch(fill.rectTransform, 8f, 8f, 8f, 8f);
+                fill.type = Image.Type.Filled;
+                fill.fillMethod = Image.FillMethod.Vertical;
+                fill.fillOrigin = 0;
+                fill.fillAmount = 0f;
+                fills[i] = fill;
+                labels[i] = Txt(root, "SensorLabel" + (i + 1), "cal.waiting", FontRole.Body, 32f, Palette.Navy);
+                Place(labels[i], Center, Center, new Vector2(x, -390f), new Vector2(300f, 56f));
+            }
+
+            Pill actionPill;
+            Button action = Btn(root, "ActionButton", Palette.Yellow, Palette.YellowShadow, 96f, 69f,
+                "cal.recordRest", FontRole.Title, 40f, Palette.ButtonText, out actionPill);
+            Place(actionPill.Rect, BottomRight, BottomRight, new Vector2(-Margin, BottomY), actionPill.Rect.sizeDelta);
+            Pill backPill;
+            Button back = Btn(root, "BackButton", Palette.White, Palette.DisabledShadow, 80f, 50f,
+                "cal.back", FontRole.Body, 36f, Palette.Navy, out backPill);
+            Place(backPill.Rect, BottomLeft, BottomLeft, new Vector2(Margin, BottomY), backPill.Rect.sizeDelta);
+
+            Set(screen, "actionButton", action);
+            Set(screen, "backButton", back);
+            Set(screen, "actionLabel", actionPill.Label);
+            Set(screen, "instruction", instruction);
+            Set(screen, "status", status);
+            SetArray(screen, "sensorLabels", labels);
+            SetArray(screen, "sensorFills", fills);
 
             return screen;
         }
@@ -1091,12 +1122,34 @@ namespace Malang.EditorTools
                 TextAlignmentOptions.Left);
             Place(title, MiddleLeft, MiddleLeft, new Vector2(rightX, 200f), new Vector2(1100f, 100f));
 
+            string[] keys = { "done.scoreS1", "done.scoreS2", "done.scoreS3" };
+            var scores = new LocText[3];
+            var metrics = new LocText[3];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                float y = 80f - i * 150f;
+                Image card = RoundImg(root, "ScoreCard" + (i + 1), Palette.White, 28f);
+                Place(card, MiddleLeft, MiddleLeft, new Vector2(rightX, y), new Vector2(970f, 130f));
+                LocText label = Txt(card.transform, "Label", keys[i], FontRole.Body, 38f, Palette.Navy,
+                    TextAlignmentOptions.Left);
+                Place(label, MiddleLeft, MiddleLeft, new Vector2(32f, 26f), new Vector2(680f, 54f));
+                scores[i] = Txt(card.transform, "Score", "", FontRole.Title, 48f, Palette.Navy);
+                Place(scores[i], new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
+                    new Vector2(-32f, 26f), new Vector2(200f, 60f));
+                scores[i].SetRaw("0 / 0");
+                metrics[i] = Txt(card.transform, "Metric", "done.metricS" + (i + 1), FontRole.Body, 30f,
+                    Palette.Navy, TextAlignmentOptions.Left);
+                Place(metrics[i], MiddleLeft, MiddleLeft, new Vector2(32f, -30f), new Vector2(870f, 44f));
+            }
+
             Pill homePill;
             Button home = Btn(root, "HomeButton", Palette.Yellow, Palette.YellowShadow, 110f, 77f, "done.home",
                 FontRole.Title, 46f, Palette.ButtonText, out homePill);
-            Place(homePill.Rect, MiddleLeft, MiddleLeft, new Vector2(rightX, -220f), homePill.Rect.sizeDelta);
+            Place(homePill.Rect, MiddleLeft, MiddleLeft, new Vector2(rightX, -390f), homePill.Rect.sizeDelta);
 
             Set(screen, "homeButton", home);
+            SetArray(screen, "scoreTexts", scores);
+            SetArray(screen, "metricTexts", metrics);
             return screen;
         }
 

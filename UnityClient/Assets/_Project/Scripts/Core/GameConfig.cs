@@ -150,7 +150,7 @@ namespace Malang.Core
 
         [Header("Stage 3 · Rhythm (신호→반응 방식)")]
         [Tooltip("노래·판정 박자 (BPM)")]
-        public float s3Bpm = 110f;
+        public float s3Bpm = 90f;
         public int s3BeatsPerBar = 4;
         [Tooltip("첫 노트 전에 노래만 들려주는 마디 수")]
         public int s3LeadInBars = 1;
@@ -163,11 +163,11 @@ namespace Malang.Core
         [Tooltip("센서·필터 지연 보정 (ms). 측정 시각을 이만큼 앞당겨 판정")]
         public float s3InputLatencyMs = 80f;
         [Tooltip("버티기: 유지 시간 중 이 비율 이상을 등급 구간 안에서 보내면 성공 (버티기 게이지가 꽉 참)")]
-        [Range(0.1f, 1f)] public float s3HoldRequiredFraction = 0.6f;
+        [Range(0.1f, 1f)] public float s3HoldRequiredFraction = 0.4f;
         [Range(0f, 1f)] public float s3MusicVolume = 0.55f;
         [Range(0f, 1f)] public float s3SfxVolume = 0.9f;
         public float s3NotePopSeconds = 0.2f;
-        public int s3NoteCount = 12;
+        public int s3NoteCount = 8;
         [Tooltip("레인 방식용 (현재 신호→반응 방식에서는 미사용)")]
         public float s3NoteIntervalSeconds = 1.7f;
         public float s3NoteHoldSeconds = 0.8f;
@@ -179,8 +179,8 @@ namespace Malang.Core
         public float s3StrongMin = 60f;
         public float s3StrongMax = 80f;
         [Tooltip("등급 정확 판정 허용 오차 (%p)")]
-        public float s3GradeTolerance = 5f;
-        public float s3WindowMs = 200f;
+        public float s3GradeTolerance = 8f;
+        public float s3WindowMs = 350f;
         [Tooltip("3단계 놓음 판정 임계값 (1·2단계는 releaseThreshold 사용)")]
         public float s3ReleaseThreshold = 10f;
         public float s3ReleaseExtraMs = 100f;
