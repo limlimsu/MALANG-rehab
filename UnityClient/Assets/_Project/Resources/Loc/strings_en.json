@@ -125,6 +125,7 @@
   "guard.yes": "Reset",
   "guard.cancel": "Cancel",
   "guard.recent": "Recent sessions",
+  "guard.historyRow": "{0} · {7}s\nStage 1 {1}/{2}  ·  Stage 2 {3}/{4}  ·  Stage 3 {5}/{6}",
   "guard.noSessions": "No sessions yet",
   "guard.close": "Close",
   "guard.mockPad": "On-screen strength buttons",

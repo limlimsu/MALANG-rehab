@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Malang.Core;
 using Malang.Input;
 using Malang.Training;
@@ -27,6 +28,7 @@ namespace Malang.EditorTools
             GameConfig cfg = GameConfig.Get();
 
             FourChannelCalibration();
+            SessionHistoryRoundTrip();
 
             Stage1_GripRelease_TenKills(cfg);
             Stage1_HoldWithoutRelease_NoNextMonster(cfg);
@@ -69,6 +71,30 @@ namespace Malang.EditorTools
                 cal.NormalizeChannels(new[] { 2500, 1500, 3000, 1000 }), 25f));
             Check("4채널: 최대 쥐기는 100%", Mathf.Approximately(
                 cal.NormalizeChannels(new[] { 2000, 2000, 2000, 2000 }), 100f));
+        }
+
+        private static void SessionHistoryRoundTrip()
+        {
+            string path = Path.Combine(Path.GetTempPath(), "malang-history-" + Guid.NewGuid() + ".jsonl");
+            try
+            {
+                var record = new SessionRecord
+                {
+                    date = "2026-11-19 12:00",
+                    durationSeconds = 35f,
+                    stages = new[] { new StageResult { stage = 1, score = 8, tries = 10 } }
+                };
+                Check("훈련 기록 저장", SessionHistory.Save(record, path));
+                File.AppendAllText(path, "{broken" + Environment.NewLine);
+                var recent = SessionHistory.Recent(3, path);
+                Check("불완전한 기록을 건너뛰고 최근 기록 읽기",
+                    recent.Count == 1 && recent[0].stages[0].score == 8);
+            }
+            finally
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
         }
 
         // ---------- 1단계 ----------
